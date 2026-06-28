@@ -1,6 +1,11 @@
+from core.response import success
+
+
 def status():
-    return {
-        "app": "Trading Assistant",
-        "status": "running",
-        "version": "0.1.0"
-    }
+    return success(
+        "Trading Assistant is running",
+        {
+            "app": "Trading Assistant",
+            "version": "0.1.0"
+        }
+    )
