@@ -19,17 +19,6 @@ class TelegramService:
             "username": update.effective_user.username or "",
         }
 
-    async def status(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        response = handle_message("/status")
-
-        text = (
-            f"🤖 {response['data']['app']}\n\n"
-            f"Status : Running ✅\n"
-            f"Version : {response['data']['version']}"
-        )
-
-        await update.message.reply_text(text)
-
     async def ping(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("🏓 Pong!")
 
@@ -39,14 +28,25 @@ class TelegramService:
             "/ping\n"
             "/status\n"
             "/whoami\n"
-            "/portfolio"
+            "/portfolio\n"
+            "/connection"
         )
 
-    async def whoami(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        response = handle_message(
-            "/whoami",
-            user=self.get_user(update),
+    async def status(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        response = handle_message("/status")
+
+        data = response["data"]
+
+        text = (
+            f"🤖 {data['app']}\n\n"
+            f"Status : Running ✅\n"
+            f"Version : {data['version']}"
         )
+
+        await update.message.reply_text(text)
+
+    async def whoami(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        response = handle_message("/whoami", user=self.get_user(update))
 
         data = response["data"]
 
@@ -60,10 +60,7 @@ class TelegramService:
         await update.message.reply_text(text)
 
     async def portfolio(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        response = handle_message(
-            "/portfolio",
-            user=self.get_user(update),
-        )
+        response = handle_message("/portfolio", user=self.get_user(update))
 
         if not response["success"]:
             await update.message.reply_text(response["message"])
@@ -75,6 +72,25 @@ class TelegramService:
             "📈 Portfolio\n\n"
             f"Broker : {data['broker']}\n"
             f"Connected : {data['connected']}"
+        )
+
+        await update.message.reply_text(text)
+
+    async def connection(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        response = handle_message("/connection", user=self.get_user(update))
+
+        if not response["success"]:
+            await update.message.reply_text(response["message"])
+            return
+
+        data = response["data"]
+
+        status = "Connected ✅" if data["connected"] else "Disconnected ❌"
+
+        text = (
+            "🔌 IBKR Connection\n\n"
+            f"Broker : {data['broker']}\n"
+            f"Status : {status}"
         )
 
         await update.message.reply_text(text)
@@ -91,6 +107,7 @@ class TelegramService:
         app.add_handler(CommandHandler("status", self.status))
         app.add_handler(CommandHandler("whoami", self.whoami))
         app.add_handler(CommandHandler("portfolio", self.portfolio))
+        app.add_handler(CommandHandler("connection", self.connection))
 
         logger.info("Telegram bot is starting...")
 
