@@ -1,11 +1,13 @@
 from core.command_router import execute
 
 
-def process_message(message: str):
-    """
-    Convert Telegram message to a core command.
-    """
+def process_message(text, user=None):
+    text = text.strip()
 
-    command = message.strip().lstrip("/")
+    if text.startswith("/"):
+        text = text[1:]
 
-    return execute(command)
+    if text == "whoami":
+        return execute(text, user=user)
+
+    return execute(text)
