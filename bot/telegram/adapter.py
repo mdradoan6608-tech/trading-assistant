@@ -7,7 +7,4 @@ def process_message(text, user=None):
     if text.startswith("/"):
         text = text[1:]
 
-    if text == "whoami":
-        return execute(text, user=user)
-
-    return execute(text)
+    return execute(text, user=user)
