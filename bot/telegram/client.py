@@ -12,6 +12,13 @@ from utils.logger import logger
 
 class TelegramService:
 
+    def get_user(self, update: Update):
+        return {
+            "id": update.effective_user.id,
+            "name": update.effective_user.full_name,
+            "username": update.effective_user.username or "",
+        }
+
     async def status(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         response = handle_message("/status")
 
@@ -31,17 +38,15 @@ class TelegramService:
             "/help\n"
             "/ping\n"
             "/status\n"
-            "/whoami"
+            "/whoami\n"
+            "/portfolio"
         )
 
     async def whoami(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        user = {
-            "id": update.effective_user.id,
-            "name": update.effective_user.full_name,
-            "username": update.effective_user.username or "",
-        }
-
-        response = handle_message("/whoami", user=user)
+        response = handle_message(
+            "/whoami",
+            user=self.get_user(update),
+        )
 
         data = response["data"]
 
@@ -50,6 +55,26 @@ class TelegramService:
             f"Name : {data['name']}\n"
             f"Username : @{data['username']}\n"
             f"User ID : {data['id']}"
+        )
+
+        await update.message.reply_text(text)
+
+    async def portfolio(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        response = handle_message(
+            "/portfolio",
+            user=self.get_user(update),
+        )
+
+        if not response["success"]:
+            await update.message.reply_text(response["message"])
+            return
+
+        data = response["data"]
+
+        text = (
+            "📈 Portfolio\n\n"
+            f"Broker : {data['broker']}\n"
+            f"Connected : {data['connected']}"
         )
 
         await update.message.reply_text(text)
@@ -65,6 +90,7 @@ class TelegramService:
         app.add_handler(CommandHandler("ping", self.ping))
         app.add_handler(CommandHandler("status", self.status))
         app.add_handler(CommandHandler("whoami", self.whoami))
+        app.add_handler(CommandHandler("portfolio", self.portfolio))
 
         logger.info("Telegram bot is starting...")
 

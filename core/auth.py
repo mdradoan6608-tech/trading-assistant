@@ -1,13 +1,7 @@
-AUTHORIZED_USERS = set()
+AUTHORIZED_USERS = {
+    6123502479,
+}
 
 
-def add_user(user_id: int):
-    AUTHORIZED_USERS.add(user_id)
-
-
-def remove_user(user_id: int):
-    AUTHORIZED_USERS.discard(user_id)
-
-
-def is_authorized(user_id: int) -> bool:
+def is_authorized(user_id):
     return user_id in AUTHORIZED_USERS
