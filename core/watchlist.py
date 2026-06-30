@@ -3,6 +3,7 @@ from storage.watchlist import (
     get_watchlist,
     save_watchlist,
 )
+from market.provider import get_prices
 
 
 def add(symbol):
@@ -42,9 +43,26 @@ def remove(symbol):
 
 
 def show():
+    symbols = get_watchlist()
+
+    if not symbols:
+        return success(
+            "Watchlist",
+            {
+                "watchlist": [],
+                "prices": [],
+            },
+        )
+
+    prices = get_prices(symbols)
+
+    if not prices["success"]:
+        return prices
+
     return success(
         "Watchlist",
         {
-            "watchlist": get_watchlist(),
+            "watchlist": symbols,
+            "prices": prices["data"]["prices"],
         },
     )
