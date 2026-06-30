@@ -4,6 +4,7 @@ from core.portfolio import portfolio
 from core.connection import connection
 from core.analyze import analyze_symbol
 from core.price import price
+from core.watchlist import add, remove, show
 
 COMMANDS = {
     "status": status,
@@ -20,3 +21,34 @@ def execute_analysis(symbol):
 
 def execute_price(symbol):
     return price(symbol)
+
+
+def execute_watchlist(action, symbol=None):
+    action = action.lower()
+
+    if action == "list":
+        return show()
+
+    if action == "add":
+        if not symbol:
+            return {
+                "success": False,
+                "message": "Usage: /watchlist add SYMBOL",
+                "data": {},
+            }
+        return add(symbol)
+
+    if action == "remove":
+        if not symbol:
+            return {
+                "success": False,
+                "message": "Usage: /watchlist remove SYMBOL",
+                "data": {},
+            }
+        return remove(symbol)
+
+    return {
+        "success": False,
+        "message": "Usage: /watchlist list | add SYMBOL | remove SYMBOL",
+        "data": {},
+    }
