@@ -2,9 +2,7 @@ from telegram import Update
 from telegram.ext import (
     Application,
     CommandHandler,
-    MessageHandler,
     ContextTypes,
-    filters,
 )
 
 from config.settings import TELEGRAM_BOT_TOKEN
@@ -32,7 +30,8 @@ class TelegramService:
             "/whoami\n"
             "/portfolio\n"
             "/connection\n"
-            "/analyze SYMBOL"
+            "/analyze SYMBOL\n"
+            "/price SYMBOL"
         )
 
     async def status(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -101,13 +100,11 @@ class TelegramService:
     async def analyze(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not context.args:
             await update.message.reply_text(
-                "Usage:\n/analyze SYMBOL\n\nExample:\n/analyze AAPL"
+                "Usage:\n/analyze SYMBOL"
             )
             return
 
-        symbol = context.args[0].upper()
-
-        response = handle_message(f"/analyze {symbol}")
+        response = handle_message(f"/analyze {context.args[0].upper()}")
 
         if not response["success"]:
             await update.message.reply_text(response["message"])
@@ -119,6 +116,32 @@ class TelegramService:
             f"📊 Analysis for {data['symbol']}\n\n"
             f"Status:\n{data['status']}\n\n"
             f"Recommendation:\n{data['recommendation']}"
+        )
+
+        await update.message.reply_text(text)
+
+    async def price(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not context.args:
+            await update.message.reply_text(
+                "Usage:\n/price SYMBOL"
+            )
+            return
+
+        response = handle_message(f"/price {context.args[0].upper()}")
+
+        if not response["success"]:
+            await update.message.reply_text(response["message"])
+            return
+
+        data = response["data"]
+
+        text = (
+            f"💲 {data['symbol']}\n\n"
+            f"Current : {data['price']}\n"
+            f"Open : {data['open']}\n"
+            f"High : {data['high']}\n"
+            f"Low : {data['low']}\n"
+            f"Previous Close : {data['previous_close']}"
         )
 
         await update.message.reply_text(text)
@@ -137,6 +160,7 @@ class TelegramService:
         app.add_handler(CommandHandler("portfolio", self.portfolio))
         app.add_handler(CommandHandler("connection", self.connection))
         app.add_handler(CommandHandler("analyze", self.analyze))
+        app.add_handler(CommandHandler("price", self.price))
 
         logger.info("Telegram bot is starting...")
 
