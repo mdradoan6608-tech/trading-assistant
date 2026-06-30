@@ -2,7 +2,9 @@ from telegram import Update
 from telegram.ext import (
     Application,
     CommandHandler,
+    MessageHandler,
     ContextTypes,
+    filters,
 )
 
 from config.settings import TELEGRAM_BOT_TOKEN
@@ -29,7 +31,8 @@ class TelegramService:
             "/status\n"
             "/whoami\n"
             "/portfolio\n"
-            "/connection"
+            "/connection\n"
+            "/analyze SYMBOL"
         )
 
     async def status(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -95,6 +98,31 @@ class TelegramService:
 
         await update.message.reply_text(text)
 
+    async def analyze(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not context.args:
+            await update.message.reply_text(
+                "Usage:\n/analyze SYMBOL\n\nExample:\n/analyze AAPL"
+            )
+            return
+
+        symbol = context.args[0].upper()
+
+        response = handle_message(f"/analyze {symbol}")
+
+        if not response["success"]:
+            await update.message.reply_text(response["message"])
+            return
+
+        data = response["data"]
+
+        text = (
+            f"📊 Analysis for {data['symbol']}\n\n"
+            f"Status:\n{data['status']}\n\n"
+            f"Recommendation:\n{data['recommendation']}"
+        )
+
+        await update.message.reply_text(text)
+
     def start(self):
         if not TELEGRAM_BOT_TOKEN:
             logger.warning("Telegram token not configured.")
@@ -108,6 +136,7 @@ class TelegramService:
         app.add_handler(CommandHandler("whoami", self.whoami))
         app.add_handler(CommandHandler("portfolio", self.portfolio))
         app.add_handler(CommandHandler("connection", self.connection))
+        app.add_handler(CommandHandler("analyze", self.analyze))
 
         logger.info("Telegram bot is starting...")
 

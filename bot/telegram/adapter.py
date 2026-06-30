@@ -1,4 +1,5 @@
 from core.command_router import execute
+from core.commands import execute_analysis
 
 
 def process_message(text, user=None):
@@ -7,4 +8,18 @@ def process_message(text, user=None):
     if text.startswith("/"):
         text = text[1:]
 
-    return execute(text, user=user)
+    parts = text.split(maxsplit=1)
+
+    command = parts[0].lower()
+
+    if command == "analyze":
+        if len(parts) < 2:
+            return {
+                "success": False,
+                "message": "Usage: /analyze SYMBOL",
+                "data": {},
+            }
+
+        return execute_analysis(parts[1])
+
+    return execute(command, user=user)
