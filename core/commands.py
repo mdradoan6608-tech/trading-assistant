@@ -49,6 +49,6 @@ def execute_watchlist(action, symbol=None):
 
     return {
         "success": False,
-        "message": "Usage: /watchlist list | add SYMBOL | remove SYMBOL",
+        "message": "Usage: /watchlist | add SYMBOL | remove SYMBOL",
         "data": {},
     }
