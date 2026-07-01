@@ -32,7 +32,7 @@ class TelegramService:
             "/connection\n"
             "/analyze SYMBOL\n"
             "/price SYMBOL\n"
-            "/watchlist list\n"
+            "/watchlist\n"
             "/watchlist add SYMBOL\n"
             "/watchlist remove SYMBOL"
         )
