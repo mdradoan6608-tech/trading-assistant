@@ -139,19 +139,23 @@ class TelegramService:
             return f"⚪ {symbol}"
 
         if previous_close:
-            change_pct = (price - previous_close) / previous_close * 100
-            dot = "🟢" if change_pct >= 0 else "🔴"
-            sign = "+" if change_pct >= 0 else ""
-            change_str = f"{sign}{change_pct:.2f}%"
+            dot = "🟢" if price >= previous_close else "🔴"
         else:
             dot = "⚪"
-            change_str = "N/A"
 
-        return f"{dot} {symbol:<6} ${price:<9.2f} {change_str}"
+        return f"{dot} {symbol:<6} ${price:.2f}"
 
     async def watchlist(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        args = context.args if context.args else ["list"]
-        command = "/watchlist " + " ".join(args)
+        if not context.args:
+            await update.message.reply_text(
+                "Usage:\n"
+                "/watchlist\n"
+                "/watchlist add SYMBOL\n"
+                "/watchlist remove SYMBOL"
+            )
+            return
+
+        command = "/watchlist " + " ".join(context.args)
 
         response = handle_message(command)
 
