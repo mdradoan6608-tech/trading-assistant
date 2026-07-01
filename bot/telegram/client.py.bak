@@ -130,21 +130,6 @@ class TelegramService:
             f"Previous Close : {data['previous_close']}"
         )
 
-    def _format_watchlist_line(self, item):
-        symbol = item.get("symbol", "?")
-        price = item.get("price")
-        previous_close = item.get("previous_close")
-
-        if price is None:
-            return f"⚪ {symbol}"
-
-        if previous_close:
-            dot = "🟢" if price >= previous_close else "🔴"
-        else:
-            dot = "⚪"
-
-        return f"{dot} {symbol:<6} ${price:.2f}"
-
     async def watchlist(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not context.args:
             await update.message.reply_text(
@@ -163,27 +148,16 @@ class TelegramService:
             await update.message.reply_text(response["message"])
             return
 
-        prices = response["data"].get("prices")
+        symbols = response["data"]["watchlist"]
 
-        if prices is None:
-            symbols = response["data"].get("watchlist", [])
-            if not symbols:
-                await update.message.reply_text("📋 Watchlist is empty.")
-                return
-            text = "📋 Watchlist\n\n"
-            for symbol in symbols:
-                text += f"• {symbol}\n"
-            await update.message.reply_text(text)
-            return
-
-        if not prices:
+        if not symbols:
             await update.message.reply_text("📋 Watchlist is empty.")
             return
 
         text = "📋 Watchlist\n\n"
 
-        for item in prices:
-            text += self._format_watchlist_line(item) + "\n"
+        for symbol in symbols:
+            text += f"• {symbol}\n"
 
         await update.message.reply_text(text)
 
