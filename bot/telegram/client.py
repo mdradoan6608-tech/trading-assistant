@@ -177,11 +177,14 @@ class TelegramService:
             return
 
         text = "📋 Watchlist\n\n"
+        text += "```\n"
 
         for item in prices:
             text += self._format_watchlist_line(item) + "\n"
 
-        await update.message.reply_text(text)
+        text += "```"
+
+        await update.message.reply_text(text, parse_mode="Markdown")
 
     def start(self):
         if not TELEGRAM_BOT_TOKEN:
