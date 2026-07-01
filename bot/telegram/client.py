@@ -149,7 +149,7 @@ class TelegramService:
         if not context.args:
             await update.message.reply_text(
                 "Usage:\n"
-                "/watchlist list\n"
+                "/watchlist\n"
                 "/watchlist add SYMBOL\n"
                 "/watchlist remove SYMBOL"
             )
