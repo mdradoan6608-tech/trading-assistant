@@ -57,9 +57,22 @@ def get_prices(symbols):
             symbol = symbol.upper()
             data = _quote(symbol)
 
+            price = data.get("c")
+
+            if not price:
+                result.append({
+                    "symbol": symbol,
+                    "price": None,
+                    "high": None,
+                    "low": None,
+                    "open": None,
+                    "previous_close": None,
+                })
+                continue
+
             result.append({
                 "symbol": symbol,
-                "price": data.get("c"),
+                "price": price,
                 "high": data.get("h"),
                 "low": data.get("l"),
                 "open": data.get("o"),
