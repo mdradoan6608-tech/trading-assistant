@@ -139,6 +139,7 @@ class TelegramService:
             return
 
         prices = response["data"]["prices"]
+        is_open = response["data"].get("is_open", False)
 
         text = "🌍 US Market\n\n"
         text += "```\n"
@@ -164,7 +165,12 @@ class TelegramService:
                 f"{sign}{change:.2f}%\n"
             )
 
-        text += "```"
+        text += "```\n\n"
+
+        status_dot = "🟢" if is_open else "🔴"
+        status_label = "OPEN" if is_open else "CLOSED"
+
+        text += f"Market Status:\n{status_dot} {status_label}"
 
         await update.message.reply_text(
             text,
