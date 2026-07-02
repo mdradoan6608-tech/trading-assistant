@@ -1,3 +1,6 @@
+from datetime import datetime
+from zoneinfo import ZoneInfo
+
 from telegram import Update
 from telegram.ext import (
     Application,
@@ -229,7 +232,12 @@ class TelegramService:
         for item in prices:
             text += self._format_watchlist_line(item) + "\n"
 
-        text += "```"
+        text += "```\n\n"
+
+        now_uae = datetime.now(ZoneInfo("Asia/Dubai"))
+        time_str = now_uae.strftime("%I:%M %p UAE").lstrip("0")
+
+        text += f"Last Updated:\n{time_str}"
 
         await update.message.reply_text(text, parse_mode="Markdown")
 
