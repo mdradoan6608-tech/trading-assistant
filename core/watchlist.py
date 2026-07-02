@@ -6,38 +6,67 @@ from storage.watchlist import (
 from market.provider import get_prices
 
 
+def _parse_symbols(raw_input):
+    parts = raw_input.split(",")
+    return [p.strip().upper() for p in parts if p.strip()]
+
+
 def add(symbol):
-    symbol = symbol.upper()
+    requested = _parse_symbols(symbol)
 
     symbols = get_watchlist()
 
-    if symbol in symbols:
-        return error(f"{symbol} already exists.")
+    added = []
+    skipped = []
 
-    symbols.append(symbol)
+    for sym in requested:
+        if sym in symbols:
+            skipped.append(sym)
+            continue
+        symbols.append(sym)
+        added.append(sym)
 
     save_watchlist(symbols)
 
+    if not added:
+        return error(f"Already in watchlist: {', '.join(skipped)}")
+
+    message = f"Added: {', '.join(added)}"
+    if skipped:
+        message += f"\nAlready exists: {', '.join(skipped)}"
+
     return success(
-        f"{symbol} added.",
+        message,
         {"watchlist": symbols},
     )
 
 
 def remove(symbol):
-    symbol = symbol.upper()
+    requested = _parse_symbols(symbol)
 
     symbols = get_watchlist()
 
-    if symbol not in symbols:
-        return error(f"{symbol} not found.")
+    removed = []
+    not_found = []
 
-    symbols.remove(symbol)
+    for sym in requested:
+        if sym not in symbols:
+            not_found.append(sym)
+            continue
+        symbols.remove(sym)
+        removed.append(sym)
 
     save_watchlist(symbols)
 
+    if not removed:
+        return error(f"Not found: {', '.join(not_found)}")
+
+    message = f"Removed: {', '.join(removed)}"
+    if not_found:
+        message += f"\nNot found: {', '.join(not_found)}"
+
     return success(
-        f"{symbol} removed.",
+        message,
         {"watchlist": symbols},
     )
 
