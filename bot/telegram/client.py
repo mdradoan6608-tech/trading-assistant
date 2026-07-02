@@ -34,7 +34,8 @@ class TelegramService:
             "/price SYMBOL\n"
             "/watchlist\n"
             "/watchlist add SYMBOL\n"
-            "/watchlist remove SYMBOL"
+            "/watchlist remove SYMBOL\n"
+            "/market"
         )
 
     async def status(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -130,6 +131,46 @@ class TelegramService:
             f"Previous Close : {data['previous_close']}"
         )
 
+    async def market(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        response = handle_message("/market")
+
+        if not response["success"]:
+            await update.message.reply_text(response["message"])
+            return
+
+        prices = response["data"]["prices"]
+
+        text = "🌍 US Market\n\n"
+        text += "```\n"
+
+        names = {
+            "SPY": "S&P 500",
+            "QQQ": "Nasdaq",
+            "DIA": "Dow Jones",
+        }
+
+        for item in prices:
+            price = item["price"]
+            previous = item["previous_close"]
+
+            change = (price - previous) / previous * 100
+
+            dot = "🟢" if change >= 0 else "🔴"
+            sign = "+" if change >= 0 else ""
+
+            text += (
+                f"{dot} "
+                f"{names.get(item['symbol'], item['symbol']):<10} "
+                f"{sign}{change:.2f}%\n"
+            )
+
+        text += "```"
+
+        await update.message.reply_text(
+            text,
+            parse_mode="Markdown",
+        )
+
     def _format_watchlist_line(self, item):
         symbol = item.get("symbol", "?")
         price = item.get("price")
@@ -202,6 +243,7 @@ class TelegramService:
         app.add_handler(CommandHandler("analyze", self.analyze))
         app.add_handler(CommandHandler("price", self.price))
         app.add_handler(CommandHandler("watchlist", self.watchlist))
+        app.add_handler(CommandHandler("market", self.market))
 
         logger.info("Telegram bot is starting...")
 

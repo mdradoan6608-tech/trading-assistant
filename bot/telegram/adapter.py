@@ -3,6 +3,7 @@ from core.commands import (
     execute_analysis,
     execute_price,
     execute_watchlist,
+    execute_market,
 )
 
 
@@ -36,13 +37,13 @@ def process_message(text, user=None):
 
         return execute_price(parts[1])
 
+    if command == "market":
+        return execute_market()
+
     if command == "watchlist":
-        # /watchlist  -> Show watchlist
         if len(parts) == 1:
             return execute_watchlist("list")
 
-        # /watchlist add AAPL
-        # /watchlist remove AAPL
         action = parts[1].lower()
         symbol = parts[2] if len(parts) > 2 else None
 

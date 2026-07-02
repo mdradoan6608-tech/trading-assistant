@@ -5,6 +5,7 @@ from core.connection import connection
 from core.analyze import analyze_symbol
 from core.price import price
 from core.watchlist import add, remove, show
+from core.market import market
 
 COMMANDS = {
     "status": status,
@@ -21,6 +22,10 @@ def execute_analysis(symbol):
 
 def execute_price(symbol):
     return price(symbol)
+
+
+def execute_market():
+    return market()
 
 
 def execute_watchlist(action, symbol=None):
