@@ -4,6 +4,7 @@ from core.commands import (
     execute_price,
     execute_watchlist,
     execute_market,
+    execute_signal,
 )
 
 
@@ -39,6 +40,15 @@ def process_message(text, user=None):
 
     if command == "market":
         return execute_market()
+
+    if command == "signal":
+        if len(parts) < 2:
+            return {
+                "success": False,
+                "message": "Usage: /signal SYMBOL",
+                "data": {},
+            }
+        return execute_signal(parts[1])
 
     if command == "watchlist":
         if len(parts) == 1:

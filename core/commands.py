@@ -6,6 +6,7 @@ from core.analyze import analyze_symbol
 from core.price import price
 from core.watchlist import add, remove, show
 from core.market import market
+from core.signal import signal
 
 COMMANDS = {
     "status": status,
@@ -26,6 +27,10 @@ def execute_price(symbol):
 
 def execute_market():
     return market()
+
+
+def execute_signal(symbol):
+    return signal(symbol)
 
 
 def execute_watchlist(action, symbol=None):

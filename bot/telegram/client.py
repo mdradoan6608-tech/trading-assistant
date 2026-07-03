@@ -180,6 +180,32 @@ class TelegramService:
             parse_mode="Markdown",
         )
 
+    async def signal(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not context.args:
+            await update.message.reply_text("Usage:\n/signal SYMBOL")
+            return
+
+        response = handle_message(f"/signal {context.args[0].upper()}")
+
+        if not response["success"]:
+            await update.message.reply_text(response["message"])
+            return
+
+        data = response["data"]
+
+        text = f"📐 {data['symbol']} Indicators\n\n"
+        text += "```\n"
+        text += f"Close        : {data['close']}\n"
+        text += f"RSI(14)      : {data['rsi']}\n"
+        text += f"RSI EMA9     : {data['rsi_ema9']}\n"
+        text += f"MACD         : {data['macd']}\n"
+        text += f"MACD Signal  : {data['macd_signal']}\n"
+        text += f"MACD Hist    : {data['macd_histogram']}\n"
+        text += f"Hist (last5) : {data['histogram_series']}\n"
+        text += "```"
+
+        await update.message.reply_text(text, parse_mode="Markdown")
+
     def _format_watchlist_line(self, item):
         symbol = item.get("symbol", "?")
         price = item.get("price")
@@ -258,6 +284,7 @@ class TelegramService:
         app.add_handler(CommandHandler("price", self.price))
         app.add_handler(CommandHandler("watchlist", self.watchlist))
         app.add_handler(CommandHandler("market", self.market))
+        app.add_handler(CommandHandler("signal", self.signal))
 
         logger.info("Telegram bot is starting...")
 
