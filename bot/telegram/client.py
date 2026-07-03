@@ -27,7 +27,7 @@ class TelegramService:
             "username": update.effective_user.username or "",
         }
 
-    async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
             "👋 Welcome to Trading Assistant\n\n"
             "Type /help to see available commands."
@@ -322,7 +322,7 @@ class TelegramService:
         app = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
 
         app.add_handler(CommandHandler("help", self.help))
-        app.add_handler(CommandHandler("start", self.start))
+        app.add_handler(CommandHandler("start", self.start_command))
         app.add_handler(CommandHandler("status", self.status))
         app.add_handler(CommandHandler("whoami", self.whoami))
         app.add_handler(CommandHandler("portfolio", self.portfolio))
