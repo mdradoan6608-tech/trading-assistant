@@ -21,7 +21,7 @@ def get_indicators(symbol, period="6mo"):
 
         close = df["Close"].squeeze()
 
-        # RSI (14) with EMA smoothing (Wilder-style via EWM)
+        # RSI (14) with EMA smoothing
         delta = close.diff()
         gain = delta.where(delta > 0, 0.0)
         loss = -delta.where(delta < 0, 0.0)
@@ -38,11 +38,17 @@ def get_indicators(symbol, period="6mo"):
         signal_line = macd_line.ewm(span=9, adjust=False).mean()
         histogram = macd_line - signal_line
 
+        # Recent range for price-action stage (last 10 days, excluding today)
+        recent_low = float(close.iloc[-11:-1].min())
+        recent_high = float(close.iloc[-11:-1].max())
+
         return success(
             f"Indicators for {symbol}",
             {
                 "symbol": symbol,
                 "close": round(float(close.iloc[-1]), 2),
+                "recent_low": round(recent_low, 2),
+                "recent_high": round(recent_high, 2),
                 "rsi": round(float(rsi.iloc[-1]), 2),
                 "rsi_ema9": round(float(rsi_ema9.iloc[-1]), 2),
                 "macd": round(float(macd_line.iloc[-1]), 2),

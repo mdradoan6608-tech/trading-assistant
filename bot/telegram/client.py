@@ -193,7 +193,17 @@ class TelegramService:
 
         data = response["data"]
 
-        text = f"📐 {data['symbol']} Indicators\n\n"
+        text = f"📐 {data['symbol']}\n\n"
+        text += f"Stage : {data['stage_label']}\n\n"
+
+        for label, passed in data["checks"]:
+            mark = "✔" if passed else "✖"
+            text += f"{mark} {label}\n"
+
+        if not data["checks"]:
+            text += "No price action setup detected.\n"
+
+        text += "\n"
         text += "```\n"
         text += f"Close        : {data['close']}\n"
         text += f"RSI(14)      : {data['rsi']}\n"
@@ -201,7 +211,6 @@ class TelegramService:
         text += f"MACD         : {data['macd']}\n"
         text += f"MACD Signal  : {data['macd_signal']}\n"
         text += f"MACD Hist    : {data['macd_histogram']}\n"
-        text += f"Hist (last5) : {data['histogram_series']}\n"
         text += "```"
 
         await update.message.reply_text(text, parse_mode="Markdown")

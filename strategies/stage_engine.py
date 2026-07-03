@@ -1,0 +1,111 @@
+STAGE_LABELS = {
+    0: "⚪ No Signal",
+    1: "👀 Watch",
+    2: "🟡 Setup",
+    3: "🟠 Almost Ready",
+    4: "🟢 BUY SIGNAL",
+}
+
+SELL_STAGE_LABELS = {
+    0: "⚪ No Signal",
+    1: "👀 Watch",
+    2: "🟡 Setup",
+    3: "🟠 Almost Ready",
+    4: "🔴 SELL SIGNAL",
+}
+
+
+def _evaluate_bull_stage(data):
+    close = data["close"]
+    recent_low = data["recent_low"]
+    rsi = data["rsi"]
+    rsi_ema9 = data["rsi_ema9"]
+    macd = data["macd"]
+    macd_signal = data["macd_signal"]
+    hist = data["histogram_series"]
+
+    checks = []
+
+    stage1 = close > recent_low * 1.02
+    checks.append(("Price bounced from recent low", stage1))
+    if not stage1:
+        return 0, checks
+
+    stage2 = rsi > rsi_ema9
+    checks.append(("RSI crossed above RSI-EMA9", stage2))
+    if not stage2:
+        return 1, checks
+
+    stage3 = len(hist) >= 3 and hist[-3] < hist[-2] < hist[-1]
+    checks.append(("MACD histogram momentum improving", stage3))
+    if not stage3:
+        return 2, checks
+
+    stage4 = macd > macd_signal
+    checks.append(("MACD line crossed above Signal", stage4))
+    if not stage4:
+        return 3, checks
+
+    return 4, checks
+
+
+def _evaluate_bear_stage(data):
+    close = data["close"]
+    recent_high = data["recent_high"]
+    rsi = data["rsi"]
+    rsi_ema9 = data["rsi_ema9"]
+    macd = data["macd"]
+    macd_signal = data["macd_signal"]
+    hist = data["histogram_series"]
+
+    checks = []
+
+    stage1 = close < recent_high * 0.98
+    checks.append(("Price dropped from recent high", stage1))
+    if not stage1:
+        return 0, checks
+
+    stage2 = rsi < rsi_ema9
+    checks.append(("RSI crossed below RSI-EMA9", stage2))
+    if not stage2:
+        return 1, checks
+
+    stage3 = len(hist) >= 3 and hist[-3] > hist[-2] > hist[-1]
+    checks.append(("MACD histogram momentum weakening", stage3))
+    if not stage3:
+        return 2, checks
+
+    stage4 = macd < macd_signal
+    checks.append(("MACD line crossed below Signal", stage4))
+    if not stage4:
+        return 3, checks
+
+    return 4, checks
+
+
+def evaluate_stage(data):
+    bull_stage, bull_checks = _evaluate_bull_stage(data)
+    bear_stage, bear_checks = _evaluate_bear_stage(data)
+
+    if bull_stage >= bear_stage and bull_stage > 0:
+        return {
+            "direction": "BUY",
+            "stage": bull_stage,
+            "label": STAGE_LABELS[bull_stage],
+            "checks": bull_checks,
+        }
+
+    if bear_stage > 0:
+        return {
+            "direction": "SELL",
+            "stage": bear_stage,
+            "label": SELL_STAGE_LABELS[bear_stage],
+            "checks": bear_checks,
+        }
+
+    return {
+        "direction": "NONE",
+        "stage": 0,
+        "label": "⚪ No Signal",
+        "checks": [],
+    }
