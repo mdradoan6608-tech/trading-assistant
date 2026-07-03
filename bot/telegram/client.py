@@ -14,8 +14,7 @@ from telegram.ext import ContextTypes as _ContextTypes
 
 from config.settings import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 from bot.telegram.handler import handle_message
-from storage.watchlist import get_watchlist
-from core.signal import signal
+from core.overview import build_overview
 from utils.logger import logger
 
 
@@ -282,37 +281,49 @@ class TelegramService:
 
         await update.message.reply_text(text, parse_mode="Markdown")
 
-    async def daily_signal_scan(self, context: _ContextTypes.DEFAULT_TYPE):
-        symbols = get_watchlist()
+    def _build_overview_text(self, title):
+        result = build_overview()
+        data = result["data"]
 
-        if not symbols:
-            return
+        text = f"{title}\n\n"
 
-        alerts = []
+        market_prices = data["market"]
+        if market_prices:
+            names = {"SPY": "S&P 500", "QQQ": "Nasdaq", "DIA": "Dow Jones"}
+            parts = []
+            for item in market_prices:
+                price = item.get("price")
+                previous = item.get("previous_close")
+                if price and previous:
+                    change = (price - previous) / previous * 100
+                    sign = "+" if change >= 0 else ""
+                    parts.append(f"{names.get(item['symbol'], item['symbol'])} {sign}{change:.2f}%")
+            if parts:
+                text += "🌍 " + " | ".join(parts) + "\n\n"
 
-        for symbol in symbols:
-            result = signal(symbol)
+        text += "📋 Watchlist\n```\n"
 
-            if not result["success"]:
-                continue
+        for item in data["watchlist"]:
+            marker = " 🔔" if item["changed"] else ""
+            text += f"{item['symbol']:<6} {item['stage_label']}{marker}\n"
 
-            data = result["data"]
+        text += "```"
 
-            if data["stage"] >= 3:
-                alerts.append(data)
+        return text
 
-        if not alerts:
-            return
-
-        text = "📡 Daily Signal Scan\n\n"
-
-        for data in alerts:
-            text += f"{data['symbol']} — {data['stage_label']}\n"
-
+    async def _send_overview(self, context, title):
+        text = self._build_overview_text(title)
         await context.bot.send_message(
             chat_id=TELEGRAM_CHAT_ID,
             text=text,
+            parse_mode="Markdown",
         )
+
+    async def pre_market_overview(self, context: _ContextTypes.DEFAULT_TYPE):
+        await self._send_overview(context, "🌅 Pre-Market Overview")
+
+    async def post_market_overview(self, context: _ContextTypes.DEFAULT_TYPE):
+        await self._send_overview(context, "🌙 Post-Market Overview")
 
     def start(self):
         if not TELEGRAM_BOT_TOKEN:
@@ -334,8 +345,13 @@ class TelegramService:
         app.add_handler(CommandHandler("signal", self.signal))
 
         app.job_queue.run_daily(
-            self.daily_signal_scan,
+            self.pre_market_overview,
             time=dt.time(hour=15, minute=30, tzinfo=ZoneInfo("Asia/Dubai")),
+        )
+
+        app.job_queue.run_daily(
+            self.post_market_overview,
+            time=dt.time(hour=0, minute=30, tzinfo=ZoneInfo("Asia/Dubai")),
         )
 
         logger.info("Telegram bot is starting...")
