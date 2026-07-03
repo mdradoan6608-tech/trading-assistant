@@ -1,5 +1,5 @@
 python-dotenv
-python-telegram-bot==22.2
+python-telegram-bot[job-queue]==22.2
 ib_insync
 requests
 yfinance

@@ -8,8 +8,14 @@ from telegram.ext import (
     ContextTypes,
 )
 
-from config.settings import TELEGRAM_BOT_TOKEN
+import datetime as dt
+
+from telegram.ext import ContextTypes as _ContextTypes
+
+from config.settings import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 from bot.telegram.handler import handle_message
+from storage.watchlist import get_watchlist
+from core.signal import signal
 from utils.logger import logger
 
 
@@ -276,6 +282,38 @@ class TelegramService:
 
         await update.message.reply_text(text, parse_mode="Markdown")
 
+    async def daily_signal_scan(self, context: _ContextTypes.DEFAULT_TYPE):
+        symbols = get_watchlist()
+
+        if not symbols:
+            return
+
+        alerts = []
+
+        for symbol in symbols:
+            result = signal(symbol)
+
+            if not result["success"]:
+                continue
+
+            data = result["data"]
+
+            if data["stage"] >= 3:
+                alerts.append(data)
+
+        if not alerts:
+            return
+
+        text = "📡 Daily Signal Scan\n\n"
+
+        for data in alerts:
+            text += f"{data['symbol']} — {data['stage_label']}\n"
+
+        await context.bot.send_message(
+            chat_id=TELEGRAM_CHAT_ID,
+            text=text,
+        )
+
     def start(self):
         if not TELEGRAM_BOT_TOKEN:
             logger.warning("Telegram token not configured.")
@@ -294,6 +332,11 @@ class TelegramService:
         app.add_handler(CommandHandler("watchlist", self.watchlist))
         app.add_handler(CommandHandler("market", self.market))
         app.add_handler(CommandHandler("signal", self.signal))
+
+        app.job_queue.run_daily(
+            self.daily_signal_scan,
+            time=dt.time(hour=15, minute=30, tzinfo=ZoneInfo("Asia/Dubai")),
+        )
 
         logger.info("Telegram bot is starting...")
 
