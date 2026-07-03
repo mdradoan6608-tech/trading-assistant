@@ -27,23 +27,27 @@ class TelegramService:
             "username": update.effective_user.username or "",
         }
 
-    async def ping(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        await update.message.reply_text("🏓 Pong!")
+    async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        await update.message.reply_text(
+            "👋 Welcome to Trading Assistant\n\n"
+            "Type /help to see available commands."
+        )
 
     async def help(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
             "/help\n"
-            "/ping\n"
+            "/start\n"
             "/status\n"
             "/whoami\n"
             "/portfolio\n"
             "/connection\n"
-            "/analyze SYMBOL\n"
             "/price SYMBOL\n"
+            "/signal SYMBOL\n"
             "/watchlist\n"
             "/watchlist add SYMBOL\n"
             "/watchlist remove SYMBOL\n"
-            "/market"
+            "/market\n"
+            "/overview"
         )
 
     async def status(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -96,25 +100,6 @@ class TelegramService:
             "🔌 IBKR Connection\n\n"
             f"Broker : {data['broker']}\n"
             f"Status : {status}"
-        )
-
-    async def analyze(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        if not context.args:
-            await update.message.reply_text("Usage:\n/analyze SYMBOL")
-            return
-
-        response = handle_message(f"/analyze {context.args[0].upper()}")
-
-        if not response["success"]:
-            await update.message.reply_text(response["message"])
-            return
-
-        data = response["data"]
-
-        await update.message.reply_text(
-            f"📊 Analysis for {data['symbol']}\n\n"
-            f"Status:\n{data['status']}\n\n"
-            f"Recommendation:\n{data['recommendation']}"
         )
 
     async def price(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -218,6 +203,10 @@ class TelegramService:
         text += f"MACD Hist    : {data['macd_histogram']}\n"
         text += "```"
 
+        await update.message.reply_text(text, parse_mode="Markdown")
+
+    async def overview(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        text = self._build_overview_text("📊 Overview")
         await update.message.reply_text(text, parse_mode="Markdown")
 
     def _format_watchlist_line(self, item):
@@ -333,16 +322,16 @@ class TelegramService:
         app = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
 
         app.add_handler(CommandHandler("help", self.help))
-        app.add_handler(CommandHandler("ping", self.ping))
+        app.add_handler(CommandHandler("start", self.start))
         app.add_handler(CommandHandler("status", self.status))
         app.add_handler(CommandHandler("whoami", self.whoami))
         app.add_handler(CommandHandler("portfolio", self.portfolio))
         app.add_handler(CommandHandler("connection", self.connection))
-        app.add_handler(CommandHandler("analyze", self.analyze))
         app.add_handler(CommandHandler("price", self.price))
         app.add_handler(CommandHandler("watchlist", self.watchlist))
         app.add_handler(CommandHandler("market", self.market))
         app.add_handler(CommandHandler("signal", self.signal))
+        app.add_handler(CommandHandler("overview", self.overview))
 
         app.job_queue.run_daily(
             self.pre_market_overview,

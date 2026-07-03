@@ -1,10 +1,10 @@
 from core.command_router import execute
 from core.commands import (
-    execute_analysis,
     execute_price,
     execute_watchlist,
     execute_market,
     execute_signal,
+    execute_overview,
 )
 
 
@@ -17,16 +17,6 @@ def process_message(text, user=None):
     parts = text.split(maxsplit=2)
 
     command = parts[0].lower()
-
-    if command == "analyze":
-        if len(parts) < 2:
-            return {
-                "success": False,
-                "message": "Usage: /analyze SYMBOL",
-                "data": {},
-            }
-
-        return execute_analysis(parts[1])
 
     if command == "price":
         if len(parts) < 2:
@@ -49,6 +39,9 @@ def process_message(text, user=None):
                 "data": {},
             }
         return execute_signal(parts[1])
+
+    if command == "overview":
+        return execute_overview()
 
     if command == "watchlist":
         if len(parts) == 1:
