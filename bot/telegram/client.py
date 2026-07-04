@@ -15,6 +15,7 @@ from telegram.ext import ContextTypes as _ContextTypes
 from config.settings import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 from bot.telegram.handler import handle_message
 from core.overview import build_overview
+from core.news_monitor import check_watchlist_news
 from utils.logger import logger
 
 
@@ -314,6 +315,28 @@ class TelegramService:
     async def post_market_overview(self, context: _ContextTypes.DEFAULT_TYPE):
         await self._send_overview(context, "🌙 Post-Market Overview")
 
+    async def news_check_job(self, context: _ContextTypes.DEFAULT_TYPE):
+        result = check_watchlist_news()
+
+        if not result["success"]:
+            return
+
+        alerts = result["data"]["alerts"]
+
+        if not alerts:
+            return
+
+        for alert in alerts:
+            text = (
+                f"📰 {alert['symbol']} News Alert\n\n"
+                f"{alert['headline']}\n\n"
+                f"{alert['analysis']}"
+            )
+            await context.bot.send_message(
+                chat_id=TELEGRAM_CHAT_ID,
+                text=text,
+            )
+
     def start(self):
         if not TELEGRAM_BOT_TOKEN:
             logger.warning("Telegram token not configured.")
@@ -341,6 +364,12 @@ class TelegramService:
         app.job_queue.run_daily(
             self.post_market_overview,
             time=dt.time(hour=0, minute=30, tzinfo=ZoneInfo("Asia/Dubai")),
+        )
+
+        app.job_queue.run_repeating(
+            self.news_check_job,
+            interval=1200,
+            first=60,
         )
 
         logger.info("Telegram bot is starting...")

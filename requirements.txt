@@ -4,3 +4,4 @@ ib_insync
 requests
 yfinance
 pandas
+google-generativeai

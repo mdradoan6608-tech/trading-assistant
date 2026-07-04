@@ -20,3 +20,6 @@ IBKR_CLIENT_ID = int(os.getenv("IBKR_CLIENT_ID", "1"))
 
 # Telegram alert recipient (your personal chat ID)
 TELEGRAM_CHAT_ID = int(os.getenv("TELEGRAM_CHAT_ID", "6123502479"))
+
+# Gemini AI
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
