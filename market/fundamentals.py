@@ -24,7 +24,7 @@ def get_fundamentals(symbol):
                 "market_cap": market_cap,
                 "pe_ratio": round(pe_ratio, 2) if pe_ratio else None,
                 "eps": round(eps, 2) if eps else None,
-                "dividend_yield": round(dividend_yield * 100, 2) if dividend_yield else None,
+                "dividend_yield": round(dividend_yield, 2) if dividend_yield else None,
                 "week_52_high": week_52_high,
                 "week_52_low": week_52_low,
             },
