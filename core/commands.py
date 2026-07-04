@@ -67,3 +67,8 @@ def execute_watchlist(action, symbol=None):
         "message": "Usage: /watchlist | add SYMBOL | remove SYMBOL",
         "data": {},
     }
+
+
+def execute_testnews():
+    from core.news_monitor import check_watchlist_news
+    return check_watchlist_news()

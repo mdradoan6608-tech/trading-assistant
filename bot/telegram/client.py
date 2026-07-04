@@ -210,6 +210,29 @@ class TelegramService:
         text = self._build_overview_text("📊 Overview")
         await update.message.reply_text(text, parse_mode="Markdown")
 
+    async def testnews(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        await update.message.reply_text("🔍 Checking news, please wait...")
+
+        response = handle_message("/testnews")
+
+        if not response["success"]:
+            await update.message.reply_text(response["message"])
+            return
+
+        alerts = response["data"]["alerts"]
+
+        if not alerts:
+            await update.message.reply_text("No important news found right now.")
+            return
+
+        for alert in alerts:
+            text = (
+                f"📰 {alert['symbol']} News Alert\n\n"
+                f"{alert['headline']}\n\n"
+                f"{alert['analysis']}"
+            )
+            await update.message.reply_text(text)
+
     def _format_watchlist_line(self, item):
         symbol = item.get("symbol", "?")
         price = item.get("price")
@@ -355,6 +378,7 @@ class TelegramService:
         app.add_handler(CommandHandler("market", self.market))
         app.add_handler(CommandHandler("signal", self.signal))
         app.add_handler(CommandHandler("overview", self.overview))
+        app.add_handler(CommandHandler("testnews", self.testnews))
 
         app.job_queue.run_daily(
             self.pre_market_overview,
