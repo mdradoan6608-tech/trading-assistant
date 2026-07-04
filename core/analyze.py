@@ -1,4 +1,5 @@
 import json
+import time
 
 from core.response import success, error
 from market.provider import get_prices
@@ -109,6 +110,8 @@ def analyze_symbol(symbol):
     news_result = get_news(symbol, days_back=3)
     news_items = news_result["data"]["news"] if news_result["success"] else []
     sentiment = _news_sentiment(symbol, news_items)
+
+    time.sleep(5)
 
     trend = "Bullish" if stage_info["direction"] == "BUY" else (
         "Bearish" if stage_info["direction"] == "SELL" else "Neutral"

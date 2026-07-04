@@ -1,4 +1,5 @@
 import json
+import time
 
 from core.response import success
 from storage.watchlist import get_watchlist
@@ -53,6 +54,7 @@ def check_watchlist_news():
                 summary=summary,
             )
 
+            time.sleep(5)
             ai_result = ask_ai(prompt)
 
             if not ai_result["success"]:
