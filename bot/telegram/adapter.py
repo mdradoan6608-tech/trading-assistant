@@ -6,6 +6,7 @@ from core.commands import (
     execute_signal,
     execute_overview,
     execute_testnews,
+    execute_analyze,
 )
 
 
@@ -46,6 +47,15 @@ def process_message(text, user=None):
 
     if command == "testnews":
         return execute_testnews()
+
+    if command == "analyze":
+        if len(parts) < 2:
+            return {
+                "success": False,
+                "message": "Usage: /analyze SYMBOL",
+                "data": {},
+            }
+        return execute_analyze(parts[1])
 
     if command == "watchlist":
         if len(parts) == 1:

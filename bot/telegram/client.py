@@ -48,7 +48,8 @@ class TelegramService:
             "/watchlist add SYMBOL\n"
             "/watchlist remove SYMBOL\n"
             "/market\n"
-            "/overview"
+            "/overview\n"
+            "/analyze SYMBOL"
         )
 
     async def status(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -233,6 +234,51 @@ class TelegramService:
             )
             await update.message.reply_text(text)
 
+    async def analyze(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not context.args:
+            await update.message.reply_text("Usage:\n/analyze SYMBOL")
+            return
+
+        await update.message.reply_text("🔍 Analyzing, please wait...")
+
+        response = handle_message(f"/analyze {context.args[0].upper()}")
+
+        if not response["success"]:
+            await update.message.reply_text(response["message"])
+            return
+
+        data = response["data"]
+
+        text = f"📊 {data['symbol']} Analysis\n\n"
+
+        text += f"💲 Price: ${data['price']} ({data['change_pct']:+.2f}%)\n"
+
+        if data["position_pct"] is not None:
+            text += f"📍 Position: {data['position_pct']}% of 52W range\n"
+
+        text += f"\n📈 Technical\n{data['stage_label']}\n"
+
+        text += f"\n📰 News\n{data['news_summary']}"
+        if data["news_counts"]:
+            pos, neu, neg = data["news_counts"]
+            text += f" ({pos} Positive, {neu} Neutral, {neg} Negative)"
+        text += "\n"
+
+        text += f"\n🏢 Company\n"
+        text += f"Market Cap : {data['market_cap']}\n"
+        text += f"P/E Ratio  : {data['pe_ratio']}\n"
+        text += f"EPS        : {data['eps']}\n"
+        if data["dividend_yield"]:
+            text += f"Dividend   : {data['dividend_yield']}%\n"
+
+        text += f"\n📊 Trend\n{data['trend']}\n"
+
+        text += f"\n⚠ Risk\n{data['risk']}\n"
+
+        text += f"\n📝 AI Summary\n{data['ai_summary']}"
+
+        await update.message.reply_text(text)
+
     def _format_watchlist_line(self, item):
         symbol = item.get("symbol", "?")
         price = item.get("price")
@@ -379,6 +425,7 @@ class TelegramService:
         app.add_handler(CommandHandler("signal", self.signal))
         app.add_handler(CommandHandler("overview", self.overview))
         app.add_handler(CommandHandler("testnews", self.testnews))
+        app.add_handler(CommandHandler("analyze", self.analyze))
 
         app.job_queue.run_daily(
             self.pre_market_overview,
