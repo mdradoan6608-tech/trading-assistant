@@ -16,6 +16,7 @@ from config.settings import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
 from bot.telegram.handler import handle_message
 from core.overview import build_overview
 from core.news_monitor import check_watchlist_news
+from storage.settings import get_news_alert_enabled, set_news_alert_enabled
 from utils.logger import logger
 
 
@@ -211,6 +212,26 @@ class TelegramService:
         text = self._build_overview_text("📊 Overview")
         await update.message.reply_text(text, parse_mode="Markdown")
 
+    async def newsalert(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if not context.args:
+            current = "ON" if get_news_alert_enabled() else "OFF"
+            await update.message.reply_text(
+                f"News alert is currently: {current}\n\n"
+                "Usage:\n/newsalert on\n/newsalert off"
+            )
+            return
+
+        arg = context.args[0].lower()
+
+        if arg == "on":
+            set_news_alert_enabled(True)
+            await update.message.reply_text("✅ Automatic news alerts turned ON.")
+        elif arg == "off":
+            set_news_alert_enabled(False)
+            await update.message.reply_text("🔕 Automatic news alerts turned OFF.")
+        else:
+            await update.message.reply_text("Usage:\n/newsalert on\n/newsalert off")
+
     async def testnews(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("🔍 Checking news, please wait...")
 
@@ -385,6 +406,9 @@ class TelegramService:
         await self._send_overview(context, "🌙 Post-Market Overview")
 
     async def news_check_job(self, context: _ContextTypes.DEFAULT_TYPE):
+        if not get_news_alert_enabled():
+            return
+
         result = check_watchlist_news()
 
         if not result["success"]:
@@ -425,6 +449,7 @@ class TelegramService:
         app.add_handler(CommandHandler("signal", self.signal))
         app.add_handler(CommandHandler("overview", self.overview))
         app.add_handler(CommandHandler("testnews", self.testnews))
+        app.add_handler(CommandHandler("newsalert", self.newsalert))
         app.add_handler(CommandHandler("analyze", self.analyze))
 
         app.job_queue.run_daily(
