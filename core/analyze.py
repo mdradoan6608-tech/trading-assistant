@@ -41,7 +41,7 @@ Classify overall sentiment. Respond ONLY in this exact JSON format, no other tex
     result = ask_ai(prompt)
 
     if not result["success"]:
-        return {"summary": "Unavailable", "counts": None}
+        return {"summary": result["message"], "counts": None}
 
     try:
         cleaned = result["data"]["text"].strip().strip("```").replace("json", "", 1).strip()
@@ -69,7 +69,7 @@ Be neutral and factual. Do not give specific buy/sell price targets or guarantee
     result = ask_ai(prompt)
 
     if not result["success"]:
-        return "AI summary unavailable right now."
+        return result["message"]
 
     return result["data"]["text"].strip()
 
