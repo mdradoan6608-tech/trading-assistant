@@ -2,9 +2,12 @@ import requests
 
 from config.settings import FINNHUB_API_KEY
 from core.response import success, error
+from utils.logger import logger
 
 
 BASE_URL = "https://finnhub.io/api/v1/quote"
+
+FRIENDLY_ERROR = "Price service is temporarily unavailable. Please try again in a few minutes."
 
 
 def _quote(symbol):
@@ -19,6 +22,21 @@ def _quote(symbol):
         raise Exception(f"HTTP {response.status_code}")
 
     return response.json()
+
+
+def _friendly_error(e, symbol=""):
+    logger.error(f"Finnhub error for {symbol}: {e}")
+
+    if isinstance(e, requests.exceptions.Timeout):
+        return FRIENDLY_ERROR
+    if isinstance(e, requests.exceptions.ConnectionError):
+        return FRIENDLY_ERROR
+    if "HTTP 429" in str(e):
+        return "Price service rate limit reached. Please try again shortly."
+    if "HTTP" in str(e):
+        return FRIENDLY_ERROR
+
+    return FRIENDLY_ERROR
 
 
 def get_price(symbol):
@@ -43,7 +61,7 @@ def get_price(symbol):
         )
 
     except Exception as e:
-        return error(str(e))
+        return error(_friendly_error(e, symbol))
 
 
 def get_prices(symbols):
@@ -85,4 +103,4 @@ def get_prices(symbols):
         )
 
     except Exception as e:
-        return error(str(e))
+        return error(_friendly_error(e))
