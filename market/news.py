@@ -2,8 +2,11 @@ import requests
 
 from config.settings import FINNHUB_API_KEY
 from core.response import success, error
+from utils.logger import logger
 
 BASE_URL = "https://finnhub.io/api/v1/company-news"
+
+FRIENDLY_ERROR = "News service is temporarily unavailable. Please try again in a few minutes."
 
 
 def get_news(symbol, days_back=1):
@@ -49,4 +52,5 @@ def get_news(symbol, days_back=1):
         )
 
     except Exception as e:
-        return error(str(e))
+        logger.error(f"Finnhub news error for {symbol}: {e}")
+        return error(FRIENDLY_ERROR)
