@@ -25,4 +25,6 @@ def ask_ai(user_prompt):
 
     except Exception as e:
         logger.error(f"Gemini API error: {e}")
-        return error(str(e))
+        if "429" in str(e):
+            return error("AI analysis is temporarily rate-limited. Please try again shortly.")
+        return error("AI analysis is temporarily unavailable. Please try again in a few minutes.")
