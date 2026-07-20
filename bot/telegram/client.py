@@ -278,6 +278,8 @@ class TelegramService:
             text += f"📍 52-Week Position: {data['position_pct']}% of range\n"
         if data.get("recent_position_pct") is not None:
             text += f"📍 10-Day Position: {data['recent_position_pct']}% of range\n"
+            if data.get("recent_low") and data.get("recent_high"):
+                text += f"   Key Levels: ${data['recent_low']} - ${data['recent_high']}\n"
 
         text += f"\n📈 Technical\n{data['stage_label']}\n"
 

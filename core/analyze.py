@@ -124,9 +124,9 @@ def analyze_symbol(symbol):
         "Bearish" if stage_info["direction"] == "SELL" else "Neutral"
     )
 
-    if recent_position_pct is not None and recent_position_pct >= 85:
+    if recent_position_pct is not None and recent_position_pct >= 80:
         risk = "Medium (near 10-day high, pullback possible)"
-    elif recent_position_pct is not None and recent_position_pct <= 15:
+    elif recent_position_pct is not None and recent_position_pct <= 20:
         risk = "Medium (near 10-day low, downside momentum possible)"
     else:
         risk = "Low to Medium"
@@ -149,6 +149,8 @@ def analyze_symbol(symbol):
             "stage_label": stage_info["label"],
             "position_pct": round(position_pct, 1) if position_pct is not None else None,
             "recent_position_pct": round(recent_position_pct, 1) if recent_position_pct is not None else None,
+            "recent_high": round(recent_high, 2) if recent_high else None,
+            "recent_low": round(recent_low, 2) if recent_low else None,
             "market_cap": _format_market_cap(fundamentals.get("market_cap")),
             "pe_ratio": fundamentals.get("pe_ratio") or "N/A",
             "eps": fundamentals.get("eps") or "N/A",
