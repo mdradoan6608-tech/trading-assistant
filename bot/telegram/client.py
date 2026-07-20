@@ -204,7 +204,6 @@ class TelegramService:
         text += f"MACD         : {data['macd']}\n"
         text += f"MACD Signal  : {data['macd_signal']}\n"
         text += f"MACD Hist    : {data['macd_histogram']}\n"
-        text += f"RVOL         : {data.get('rvol')}\n"
         text += "```"
 
         await update.message.reply_text(text, parse_mode="Markdown")
