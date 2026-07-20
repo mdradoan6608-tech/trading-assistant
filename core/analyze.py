@@ -107,6 +107,13 @@ def analyze_symbol(symbol):
     if week_52_high and week_52_low and week_52_high != week_52_low:
         position_pct = (price - week_52_low) / (week_52_high - week_52_low) * 100
 
+    recent_high = indicator_data.get("recent_high")
+    recent_low = indicator_data.get("recent_low")
+
+    recent_position_pct = None
+    if recent_high and recent_low and recent_high != recent_low:
+        recent_position_pct = (price - recent_low) / (recent_high - recent_low) * 100
+
     news_result = get_news(symbol, days_back=3)
     news_items = news_result["data"]["news"] if news_result["success"] else []
     sentiment = _news_sentiment(symbol, news_items)
@@ -117,10 +124,10 @@ def analyze_symbol(symbol):
         "Bearish" if stage_info["direction"] == "SELL" else "Neutral"
     )
 
-    if position_pct is not None and position_pct >= 90:
-        risk = "Medium (near 52-week high, pullback possible)"
-    elif position_pct is not None and position_pct <= 10:
-        risk = "Medium (near 52-week low, volatility possible)"
+    if recent_position_pct is not None and recent_position_pct >= 85:
+        risk = "Medium (near 10-day high, pullback possible)"
+    elif recent_position_pct is not None and recent_position_pct <= 15:
+        risk = "Medium (near 10-day low, downside momentum possible)"
     else:
         risk = "Low to Medium"
 
@@ -141,6 +148,7 @@ def analyze_symbol(symbol):
             "change_pct": round(change_pct, 2),
             "stage_label": stage_info["label"],
             "position_pct": round(position_pct, 1) if position_pct is not None else None,
+            "recent_position_pct": round(recent_position_pct, 1) if recent_position_pct is not None else None,
             "market_cap": _format_market_cap(fundamentals.get("market_cap")),
             "pe_ratio": fundamentals.get("pe_ratio") or "N/A",
             "eps": fundamentals.get("eps") or "N/A",

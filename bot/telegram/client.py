@@ -275,7 +275,9 @@ class TelegramService:
         text += f"💲 Price: ${data['price']} ({data['change_pct']:+.2f}%)\n"
 
         if data["position_pct"] is not None:
-            text += f"📍 Position: {data['position_pct']}% of 52W range\n"
+            text += f"📍 52-Week Position: {data['position_pct']}% of range\n"
+        if data.get("recent_position_pct") is not None:
+            text += f"📍 10-Day Position: {data['recent_position_pct']}% of range\n"
 
         text += f"\n📈 Technical\n{data['stage_label']}\n"
 
