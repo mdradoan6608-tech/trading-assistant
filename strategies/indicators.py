@@ -20,6 +20,7 @@ def get_indicators(symbol, period="6mo"):
             return error(f"No historical data found for {symbol}.")
 
         close = df["Close"].squeeze()
+        volume = df["Volume"].squeeze()
 
         # RSI (14) with EMA smoothing
         delta = close.diff()
@@ -42,6 +43,11 @@ def get_indicators(symbol, period="6mo"):
         recent_low = float(close.iloc[-11:-1].min())
         recent_high = float(close.iloc[-11:-1].max())
 
+        # Relative volume (today's volume vs 20-day average, excluding today)
+        avg_volume = float(volume.iloc[-21:-1].mean())
+        today_volume = float(volume.iloc[-1])
+        rvol = round(today_volume / avg_volume, 2) if avg_volume > 0 else None
+
         return success(
             f"Indicators for {symbol}",
             {
@@ -55,6 +61,7 @@ def get_indicators(symbol, period="6mo"):
                 "macd_signal": round(float(signal_line.iloc[-1]), 2),
                 "macd_histogram": round(float(histogram.iloc[-1]), 2),
                 "histogram_series": [round(float(x), 2) for x in histogram.tail(5)],
+                "rvol": rvol,
             },
         )
 

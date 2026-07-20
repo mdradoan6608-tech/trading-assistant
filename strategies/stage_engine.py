@@ -83,23 +83,40 @@ def _evaluate_bear_stage(data):
     return 4, checks
 
 
+def _volume_tag(rvol):
+    if rvol is None:
+        return ""
+    if rvol >= 1.5:
+        return " (Strong volume ✓)"
+    if rvol < 0.7:
+        return " (Low volume ⚠️)"
+    return ""
+
+
 def evaluate_stage(data):
     bull_stage, bull_checks = _evaluate_bull_stage(data)
     bear_stage, bear_checks = _evaluate_bear_stage(data)
+    rvol = data.get("rvol")
 
     if bull_stage >= bear_stage and bull_stage > 0:
+        label = STAGE_LABELS[bull_stage]
+        if bull_stage == 4:
+            label += _volume_tag(rvol)
         return {
             "direction": "BUY",
             "stage": bull_stage,
-            "label": STAGE_LABELS[bull_stage],
+            "label": label,
             "checks": bull_checks,
         }
 
     if bear_stage > 0:
+        label = SELL_STAGE_LABELS[bear_stage]
+        if bear_stage == 4:
+            label += _volume_tag(rvol)
         return {
             "direction": "SELL",
             "stage": bear_stage,
-            "label": SELL_STAGE_LABELS[bear_stage],
+            "label": label,
             "checks": bear_checks,
         }
 
