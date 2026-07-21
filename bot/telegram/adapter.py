@@ -7,6 +7,7 @@ from core.commands import (
     execute_overview,
     execute_testnews,
     execute_analyze,
+    execute_recap,
 )
 
 
@@ -56,6 +57,9 @@ def process_message(text, user=None):
                 "data": {},
             }
         return execute_analyze(parts[1])
+
+    if command == "recap":
+        return execute_recap()
 
     if command == "watchlist":
         if len(parts) == 1:

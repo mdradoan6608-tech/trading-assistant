@@ -50,7 +50,8 @@ class TelegramService:
             "/watchlist remove SYMBOL\n"
             "/market\n"
             "/overview\n"
-            "/analyze SYMBOL"
+            "/analyze SYMBOL\n"
+            "/recap"
         )
 
     async def status(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -205,6 +206,37 @@ class TelegramService:
         text += f"MACD Signal  : {data['macd_signal']}\n"
         text += f"MACD Hist    : {data['macd_histogram']}\n"
         text += "```"
+
+        await update.message.reply_text(text, parse_mode="Markdown")
+
+    async def recap(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        response = handle_message("/recap")
+
+        if not response["success"]:
+            await update.message.reply_text(response["message"])
+            return
+
+        data = response["data"]
+
+        if not data["has_data"]:
+            await update.message.reply_text(
+                "📊 No signal history yet.\n"
+                "Check back after a few days of daily overviews."
+            )
+            return
+
+        text = f"📊 Weekly Recap (last {data['days_back']} days)\n\n"
+
+        for s in data["symbols"]:
+            text += f"*{s['symbol']}*\n"
+            if s["buy_count"]:
+                text += f"  🟢 BUY signals: {s['buy_count']}\n"
+            if s["sell_count"]:
+                text += f"  🔴 SELL signals: {s['sell_count']}\n"
+            text += f"  First: {s['first_direction']} @ ${s['first_price']} ({s['first_date']})\n"
+            if s["first_date"] != s["last_date"]:
+                text += f"  Latest: {s['last_direction']} @ ${s['last_price']} ({s['last_date']})\n"
+            text += "\n"
 
         await update.message.reply_text(text, parse_mode="Markdown")
 
@@ -455,6 +487,7 @@ class TelegramService:
         app.add_handler(CommandHandler("testnews", self.testnews))
         app.add_handler(CommandHandler("newsalert", self.newsalert))
         app.add_handler(CommandHandler("analyze", self.analyze))
+        app.add_handler(CommandHandler("recap", self.recap))
 
         app.job_queue.run_daily(
             self.pre_market_overview,

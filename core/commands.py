@@ -77,3 +77,8 @@ def execute_testnews():
 def execute_analyze(symbol):
     from core.analyze import analyze_symbol
     return analyze_symbol(symbol)
+
+
+def execute_recap():
+    from core.recap import build_recap
+    return build_recap()
