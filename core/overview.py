@@ -3,6 +3,7 @@ from core.market import market
 from storage.watchlist import get_watchlist
 from storage.signal_history import get_last_stages, save_last_stages
 from core.signal import signal
+from storage.signal_log import log_signal
 
 
 def build_overview():
@@ -37,6 +38,9 @@ def build_overview():
             "direction": direction,
             "changed": changed,
         })
+
+        if current_stage == 4 and direction in ("BUY", "SELL"):
+            log_signal(sym, direction, data["close"])
 
         new_stages[sym] = current_stage
 
