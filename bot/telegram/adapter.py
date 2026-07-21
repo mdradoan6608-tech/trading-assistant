@@ -5,7 +5,6 @@ from core.commands import (
     execute_market,
     execute_signal,
     execute_overview,
-    execute_testnews,
     execute_analyze,
     execute_recap,
 )
@@ -45,9 +44,6 @@ def process_message(text, user=None):
 
     if command == "overview":
         return execute_overview()
-
-    if command == "testnews":
-        return execute_testnews()
 
     if command == "analyze":
         if len(parts) < 2:

@@ -264,29 +264,6 @@ class TelegramService:
         else:
             await update.message.reply_text("Usage:\n/newsalert on\n/newsalert off")
 
-    async def testnews(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        await update.message.reply_text("🔍 Checking news, please wait...")
-
-        response = handle_message("/testnews")
-
-        if not response["success"]:
-            await update.message.reply_text(response["message"])
-            return
-
-        alerts = response["data"]["alerts"]
-
-        if not alerts:
-            await update.message.reply_text("No important news found right now.")
-            return
-
-        for alert in alerts:
-            text = (
-                f"📰 {alert['symbol']} News Alert\n\n"
-                f"{alert['headline']}\n\n"
-                f"{alert['analysis']}"
-            )
-            await update.message.reply_text(text)
-
     async def analyze(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not context.args:
             await update.message.reply_text("Usage:\n/analyze SYMBOL")
@@ -445,7 +422,7 @@ class TelegramService:
         if not get_news_alert_enabled():
             return
 
-        result = check_watchlist_news()
+        result = await check_watchlist_news()
 
         if not result["success"]:
             return
@@ -484,7 +461,6 @@ class TelegramService:
         app.add_handler(CommandHandler("market", self.market))
         app.add_handler(CommandHandler("signal", self.signal))
         app.add_handler(CommandHandler("overview", self.overview))
-        app.add_handler(CommandHandler("testnews", self.testnews))
         app.add_handler(CommandHandler("newsalert", self.newsalert))
         app.add_handler(CommandHandler("analyze", self.analyze))
         app.add_handler(CommandHandler("recap", self.recap))

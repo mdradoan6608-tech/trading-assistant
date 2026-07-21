@@ -1,5 +1,5 @@
 import json
-import time
+import asyncio
 
 from core.response import success
 from storage.watchlist import get_watchlist
@@ -20,7 +20,7 @@ Respond ONLY in this exact JSON format, no other text:
 """
 
 
-def check_watchlist_news():
+async def check_watchlist_news():
     symbols = get_watchlist()
     seen_ids = get_seen_ids()
 
@@ -54,7 +54,7 @@ def check_watchlist_news():
                 summary=summary,
             )
 
-            time.sleep(5)
+            await asyncio.sleep(5)
             ai_result = ask_ai(prompt)
 
             if not ai_result["success"]:

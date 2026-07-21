@@ -69,11 +69,6 @@ def execute_watchlist(action, symbol=None):
     }
 
 
-def execute_testnews():
-    from core.news_monitor import check_watchlist_news
-    return check_watchlist_news()
-
-
 def execute_analyze(symbol):
     from core.analyze import analyze_symbol
     return analyze_symbol(symbol)
