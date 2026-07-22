@@ -8,15 +8,17 @@ from market.news import get_news
 from ai.engine import ask_ai
 
 
-FILTER_PROMPT = """A stock news headline and summary is given below for {symbol}.
+FILTER_PROMPT = """A stock news headline and summary is given below, tagged under {symbol}'s news feed.
 
 Headline: {headline}
 Summary: {summary}
 
-Decide if this news is likely to meaningfully move the stock price (earnings, major product news, legal/regulatory action, executive changes, M&A, major guidance changes, etc). Ignore routine/minor news (small partnerships, minor analyst notes, generic market commentary).
+Decide if this news is likely to meaningfully move {symbol}'s stock price (earnings, major product news, legal/regulatory action, executive changes, M&A, major guidance changes, etc). Ignore routine/minor news (small partnerships, minor analyst notes, generic market commentary).
+
+Note: sometimes a headline is actually about a different company (a competitor, supplier, or peer) that only indirectly affects {symbol}. If so, make that clear in the Bengali headline translation, e.g. prefix it with the actual company name and note it's peer/related news.
 
 Respond ONLY in this exact JSON format, no other text. Both "headline_bn" and "analysis" must be written in natural Bengali (Bangla script), keeping standard financial terms (like bullish, bearish, ETF) in English where a Bengali equivalent is uncommon:
-{{"important": true or false, "headline_bn": "Bengali translation of the headline", "analysis": "1-2 sentence plain-language explanation of impact and direction, in Bengali"}}
+{{"important": true or false, "headline_bn": "Bengali translation of the headline, clarifying if it is about a different company", "analysis": "1-2 sentence plain-language explanation of impact and direction on {symbol}, in Bengali"}}
 """
 
 
