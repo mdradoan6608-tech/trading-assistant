@@ -15,8 +15,8 @@ Summary: {summary}
 
 Decide if this news is likely to meaningfully move the stock price (earnings, major product news, legal/regulatory action, executive changes, M&A, major guidance changes, etc). Ignore routine/minor news (small partnerships, minor analyst notes, generic market commentary).
 
-Respond ONLY in this exact JSON format, no other text:
-{{"important": true or false, "analysis": "1-2 sentence plain-language explanation of impact and direction (bullish/bearish/neutral), in simple words"}}
+Respond ONLY in this exact JSON format, no other text. Both "headline_bn" and "analysis" must be written in natural Bengali (Bangla script), keeping standard financial terms (like bullish, bearish, ETF) in English where a Bengali equivalent is uncommon:
+{{"important": true or false, "headline_bn": "Bengali translation of the headline", "analysis": "1-2 sentence plain-language explanation of impact and direction, in Bengali"}}
 """
 
 
@@ -71,7 +71,7 @@ async def check_watchlist_news():
             if parsed.get("important"):
                 alerts.append({
                     "symbol": symbol,
-                    "headline": headline,
+                    "headline": parsed.get("headline_bn", headline),
                     "analysis": parsed.get("analysis", ""),
                 })
 
