@@ -86,9 +86,9 @@ def _evaluate_bear_stage(data):
 def _volume_tag(rvol):
     if rvol is None:
         return ""
-    if rvol >= 1.5:
+    if rvol >= 1.3:
         return " (Strong volume ✓)"
-    if rvol < 0.7:
+    if rvol <= 0.8:
         return " (Low volume ⚠️)"
     return ""
 
