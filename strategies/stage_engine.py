@@ -1,16 +1,16 @@
 STAGE_LABELS = {
     0: "⚪ No Signal",
-    1: "👀 Watch",
-    2: "🟡 Setup",
-    3: "🟠 Almost Ready",
+    1: "👀 Watch (Bullish)",
+    2: "🟡 Setup (Bullish)",
+    3: "🟠 Almost Ready (Bullish)",
     4: "🟢 BUY SIGNAL",
 }
 
 SELL_STAGE_LABELS = {
     0: "⚪ No Signal",
-    1: "👀 Watch",
-    2: "🟡 Setup",
-    3: "🟠 Almost Ready",
+    1: "👀 Watch (Bearish)",
+    2: "🟡 Setup (Bearish)",
+    3: "🟠 Almost Ready (Bearish)",
     4: "🔴 SELL SIGNAL",
 }
 
